@@ -20,8 +20,7 @@ enum DockLocation: String {
 }
 
 struct MacOSUtils {
-    
-    // MARK: - Shell Command Runner (Verbose)
+
     @discardableResult
     private static func runShell(_ command: String, args: [String]) -> Int32 {
         print("----------------------------------------------------------")
@@ -46,9 +45,7 @@ struct MacOSUtils {
         }
     }
     
-    
-    // MARK: - Dock Auto-hide
-    
+
     static func setDockAutohide(_ enable: Bool) {
         print("==========================================================")
         print("🟦 setDockAutohide(enable: \(enable))")
@@ -62,8 +59,7 @@ struct MacOSUtils {
         restartDock()
     }
     
-    
-    // MARK: - Dock Position
+
     
     static func setDockLocation(_ location: DockLocation) {
         print("==========================================================")
@@ -76,13 +72,7 @@ struct MacOSUtils {
     }
     
     
-    // MARK: - Restart Dock (ALWAYS WORKS)
-    //
-    // killall Dock is the ONLY fully reliable method.
-    // - Works in sandbox & non-sandbox apps
-    // - Does NOT need automation permissions
-    // - Does NOT need process listing
-    // - Dock respawns automatically
+
     //
     private static func restartDock() {
         print("==========================================================")
@@ -97,9 +87,7 @@ struct MacOSUtils {
         }
     }
     
-    
-    // MARK: - Stage Manager (macOS 13+ via AppleScript)
-    
+
     static func setStageManager(_ enable: Bool) {
         print("==========================================================")
         print("🟪 setStageManager(enable: \(enable))")
