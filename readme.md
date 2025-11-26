@@ -7,7 +7,7 @@ Essentially, for each combination of monitors, we might want a unique Dock posit
 
 ## Screenshot... WIP
 
-![Monitor Config Screenshot](screenshot.png)
+![Monitor Config Screenshot](Screenshot.png)
 
 
 ## I got stuck....
