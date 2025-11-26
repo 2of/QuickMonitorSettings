@@ -12,7 +12,7 @@ Essentially, for each combination of monitors, we might want a unique Dock posit
 
 ## I got stuck....
 
-So essentially we have to call some low level APIs sucj as killall-dock and that's just outright protected behind a dev account or SIP
+So essentially we have to call some `low level APIs` such as killall-dock or we need to write into sys configs...  and in some cases that's just outright protected behind a dev account or SIP
 
 I run into:
 
