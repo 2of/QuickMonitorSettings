@@ -43,7 +43,7 @@ class ConfigManager {
     static func saveConfig(_ configs: [MonitorConfig]) {
            let fileManager = FileManager.default
            guard let appSupportDir = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-               print("⚠️ Could not find Application Support directory")
+               print("Could not fnid Application Support directory")
                return
            }
            let appFolder = appSupportDir.appendingPathComponent("QuickMonitorSettings")
@@ -60,7 +60,7 @@ class ConfigManager {
                try data.write(to: configURL)
                print("Saved MonitorConfig.json at \(configURL.path)")
            } catch {
-               print("⚠️ Failed to save config: \(error)")
+               print("Failed to save config: \(error)")
            }
        }
     

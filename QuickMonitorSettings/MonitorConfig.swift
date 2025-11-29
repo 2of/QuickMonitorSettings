@@ -15,7 +15,17 @@ struct MonitorConfig: Identifiable, Codable {
     var dockPosition: String     // Settings apply to the entire config
     var dockHide: Bool
     
-    /// Returns true if this config matches the given set of display names
+    // New Fields 
+    var stageManager: Bool = false
+    var showRecentApps: Bool = true
+    var magnification: Bool = false
+    var dockSize: Double = 0.5 // 0.0 to 1.0
+    var magnificationSize: Double = 1.0 // 0.0 to 1.0
+    var minimizeEffect: String = "genie" // genie, scale
+        
+    
+    
+    // sooo we compare all of the display names to match instead of using a unique key, it's cheeky but who has a bajillion monitors anyway.... riiight?
     func matchesDisplays(_ displayNames: Set<String>) -> Bool {
         return Set(self.displayNames) == displayNames
     }

@@ -7,16 +7,20 @@ Essentially, for each combination of monitors, we might want a unique Dock posit
 
 ## Screenshot... WIP
 
-![Monitor Config Screenshot](screenshot.png)
+![Monitor Config Screenshot](Screenshot.png)
 
 
-## I got stuck....
 
-So essentially we have to call some low level APIs sucj as killall-dock and that's just outright protected behind a dev account or SIP
+## ~~I got stuck....~~
 
-I run into:
+~~So essentially we have to call some low level APIs sucj as killall-dock and that's just outright protected behind a dev account or SIP~~
+
+~~I run into:~~
 
 `killall: warning: kill -term 45438: Operation not permitted
 Exit code: 1`
 
-and cannot resolve it.  There's some very nasty chatgpt debug print-hell in `MacOSInterfaceUtils.swift` to try to get to the bottom of it.
+~~and cannot resolve it.  There's some very nasty chatgpt debug print-hell in `MacOSInterfaceUtils.swift` to try to get to the bottom of it.~~
+
+
+Well as it turns out you just need to disable sandboxing in the xcode build target......

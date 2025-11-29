@@ -2,44 +2,49 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State private var configs: [MonitorConfig]
+    @ObservedObject var appState: AppState
     @State private var selectedConfigId: UUID?
-    let activeConfig: MonitorConfig?
     
-    init(configs: [MonitorConfig], activeConfig: MonitorConfig? = nil) {
-        _configs = State(initialValue: configs)
-        _selectedConfigId = State(initialValue: configs.first?.id)
-        self.activeConfig = activeConfig
+    init(appState: AppState) {
+        self.appState = appState
+        _selectedConfigId = State(initialValue: appState.activeConfigId)
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Active Config Banner
-            if let active = activeConfig {
-                ActiveConfigBanner(config: active)
-            }
-            
-            Divider()
-            
-            // Main Config Management UI
-            NavigationSplitView {
-                List(selection: $selectedConfigId) {
-                    ForEach($configs) { $config in
+        NavigationSplitView {
+            VStack(spacing: 0) {
+                if !appState.hasMatchingConfig {
+                    VStack(spacing: 8) {
                         HStack {
-                            TextField("Config Name", text: $config.name)
-                            if activeConfig?.id == config.id {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                            }
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text("No config for current monitors")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        
+                        Button(action: createConfigFromCurrentMonitors) {
+                            Label("Create Config from Current Setup", systemImage: "plus.circle.fill")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    }
+                    .padding(12)
+                    .background(.orange.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 8)
+            
+                }
+                
+                List(selection: $selectedConfigId) {
+                    ForEach($appState.configs) { $config in
+                        ConfigRow(config: config, isActive: appState.activeConfigId == config.id) {
+                            deleteConfig(config)
                         }
                         .tag(config.id)
-                    }
-                    .onDelete { indexSet in
-                        configs.remove(atOffsets: indexSet)
-                        if selectedConfigId == nil, let first = configs.first {
-                            selectedConfigId = first.id
-                        }
-                        save()
                     }
                 }
                 .navigationTitle("Configs")
@@ -48,140 +53,97 @@ struct ContentView: View {
                         Label("Add Config", systemImage: "plus")
                     }
                 }
-            } detail: {
-                if let index = configs.firstIndex(where: { $0.id == selectedConfigId }) {
-                    ConfigDetailView(config: $configs[index], onSave: save)
-                } else {
-                    Text("Select a config")
+                .background(.ultraThinMaterial)
+                .scrollContentBackground(.hidden)
+                .frame(minWidth: 180)
+            }
+            
+        } detail: {
+            if let configId = selectedConfigId {
+                ConfigDetailView(appState: appState, configId: configId)
+                    .background(
+                        LinearGradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            .ignoresSafeArea()
+                    )
+            } else {
+                VStack {
+                    Image(systemName: "display.2")
+                        .font(.system(size: 60))
+                        .foregroundColor(.secondary.opacity(0.5))
+                    Text("Select a configuration")
+                        .font(.title2)
                         .foregroundColor(.secondary)
                 }
             }
-            .frame(minHeight: 350)
         }
-        .frame(minWidth: 600, minHeight: 400)
-        .onDisappear {
-             save()
-        }
+        .frame(minWidth: 500, minHeight: 400)
     }
     
     private func addConfig() {
-        let newConfig = MonitorConfig(
-            name: "New Config", 
-            displayNames: [],
-            dockPosition: "bottom",
-            dockHide: false
-        )
-        configs.append(newConfig)
+        let currentDisplays = appState.getCurrentDisplayNames()
+        let newConfig = appState.createConfigForCurrentSetup(displayNames: currentDisplays)
+        
+        appState.configs.append(newConfig)
         selectedConfigId = newConfig.id
-        save()
+        appState.saveConfigs()
     }
     
-    private func save() {
-        ConfigManager.saveConfig(configs)
+    private func deleteConfig(_ config: MonitorConfig) {
+        if let index = appState.configs.firstIndex(where: { $0.id == config.id }) {
+            appState.configs.remove(at: index)
+            if selectedConfigId == config.id {
+                selectedConfigId = appState.configs.first?.id
+            }
+            appState.saveConfigs()
+        }
+    }
+    
+    private func createConfigFromCurrentMonitors() {
+        let currentDisplays = appState.getCurrentDisplayNames()
+        let newConfig = appState.createConfigForCurrentSetup(displayNames: currentDisplays)
+        
+        appState.configs.append(newConfig)
+        selectedConfigId = newConfig.id
+        appState.activeConfigId = newConfig.id
+        appState.saveConfigs()
     }
 }
 
-struct ActiveConfigBanner: View {
+struct ConfigRow: View {
     let config: MonitorConfig
+    let isActive: Bool
+    let onDelete: () -> Void
+    
+    @State private var isHovering = false
     
     var body: some View {
         HStack {
-            Image(systemName: "circle.fill")
-                .foregroundColor(.green)
-                .font(.caption)
-            
-            Text("Active: \(config.name)")
-                .font(.headline)
-            
-            Spacer()
-            
-            HStack(spacing: 12) {
-                Label(config.dockPosition.capitalized, systemImage: "dock.rectangle")
+            VStack(alignment: .leading) {
+                Text(config.name)
+                    .font(.headline)
+                Text("\(config.displayNames.count) Monitors")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
-                if config.dockHide {
-                    Label("Auto-hide", systemImage: "eye.slash")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.green.opacity(0.1))
-    }
-}
-
-struct ConfigDetailView: View {
-    @Binding var config: MonitorConfig
-    var onSave: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Settings for \(config.name)")
-                .font(.title2)
-                .bold()
-
-            // Display list of monitors in this config
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Monitors in this setup:")
-                    .font(.headline)
-                
-                if config.displayNames.isEmpty {
-                    Text("No monitors detected yet")
-                        .foregroundColor(.secondary)
-                        .italic()
-                } else {
-                    ForEach(config.displayNames, id: \.self) { displayName in
-                        HStack {
-                            Image(systemName: "display")
-                                .foregroundColor(.blue)
-                            Text(displayName)
-                        }
-                    }
-                }
-            }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(8)
-            
-            Divider()
-            
-            // Config-level settings
-            VStack(alignment: .leading, spacing: 15) {
-                Text("Settings for this config:")
-                    .font(.headline)
-                
-                Grid(horizontalSpacing: 15, verticalSpacing: 12) {
-                    GridRow {
-                        Text("Dock Position:")
-                            .foregroundColor(.secondary)
-                            .gridColumnAlignment(.trailing)
-                        Picker("", selection: $config.dockPosition) {
-                            Text("Top").tag("top")
-                            Text("Left").tag("left")
-                            Text("Right").tag("right")
-                            Text("Bottom").tag("bottom")
-                        }
-                        .labelsHidden()
-                        .frame(width: 120)
-                        .onChange(of: config.dockPosition) { _ in onSave() }
-                    }
-                    
-                    GridRow {
-                        Text("Dock Auto-Hide:")
-                            .foregroundColor(.secondary)
-                            .gridColumnAlignment(.trailing)
-                        Toggle("", isOn: $config.dockHide)
-                            .labelsHidden()
-                            .onChange(of: config.dockHide) { _ in onSave() }
-                    }
-                }
-            }
-            
             Spacer()
+            
+            if isActive {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+            }
+            
+            if isHovering {
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(.plain)
+                .padding(.leading, 8)
+            }
         }
-        .padding()
+        .padding(.vertical, 4)
+        .onHover { hovering in
+            isHovering = hovering
+        }
     }
 }
