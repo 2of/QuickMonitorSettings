@@ -1,26 +1,46 @@
 # Quick and Dirty Monitor Config Tool
 
-Essentially, for each combination of monitors, we might want a unique Dock position and hiding behavior.
+**A utility for dynamic Dock configurations based on your connected monitor setup.**
 
-- Internal display only → hidden bottom dock
-- External monitor → left dock that doesn’t hide
+Essentially, for each combination of monitors, we might want a unique Dock position and hiding behavior. This tool runs in the background and switches your settings automatically.
 
-## Screenshot... WIP
+- **Internal display only** → Hidden bottom dock
+- **External monitor** → Left dock that doesn’t hide
 
-![Monitor Config Screenshot](Screenshot.png)
+##  Downloads & Links
+
+| Platform | Link |
+| :--- | :--- |
+| **Mac App Store** | [Coming Soon](/) |
+| **Direct Download** | [Download .dmg](/) |
+| **Website** | [Visit Live Website]( https://2of.github.io/QuickMonitorSettings/) |
+
+## Features
+
+* **Per-Monitor Profiles:** Assign specific Dock positions (Left, Bottom, Right) and visibility settings (Auto-hide On/Off) to specific display serial numbers or configurations.
+* **Instant Switching:** Detects display changes immediately and applies the correct profile.
+* **Lightweight:** Runs silently in the background with minimal resource usage.
+
+## Code & Stack and Details
+
+This repository contains the source code for the macOS application.
+
+* **Language:** Swift
+* **UI Framework:** SwiftUI / AppKit
+* **System APIs:**
+    * **CoreGraphics:** Used to detect display connect/disconnect events and identify monitor serial numbers -> We hasht these
+    * **UserDefaults/Scripting:** Used to modify the Dock plist and restart the Dock process dynamically.
+
+##  Screenshots
+
+![Monitor Config Screenshot](SS4.png)
+![Monitor Config Screenshot](SS2.png)
+
+![Monitor Config Screenshot](SS3.png)
+
+#### Feel free to use the 'open config folder' button to export json configs
 
 
+##  License
 
-## ~~I got stuck....~~
-
-~~So essentially we have to call some low level APIs sucj as killall-dock and that's just outright protected behind a dev account or SIP~~
-
-~~I run into:~~
-
-`killall: warning: kill -term 45438: Operation not permitted
-Exit code: 1`
-
-~~and cannot resolve it.  There's some very nasty chatgpt debug print-hell in `MacOSInterfaceUtils.swift` to try to get to the bottom of it.~~
-
-
-Well as it turns out you just need to disable sandboxing in the xcode build target......
+This project is licensed under the MIT License - Do as you please but kindly send people my way
