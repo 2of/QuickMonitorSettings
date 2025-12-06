@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { Github, Linkedin, Twitter, Download, Monitor } from 'lucide-react'
 import links from './links.json'
 import { Logo } from './misc/Logo'
-
+import SS1 from "../public/SS1.png"
+import SS2 from "../public/SS2.png"
+import SS4 from "../public/SS4.png"
 function App() {
   return (
     <div className="app-container">
@@ -65,8 +67,10 @@ function App() {
 
           <div className="right-column">
             <div className="mockup-container">
-              <img src="/LargeMockup.png" alt="macOS Desktop Mockup" className="large-mockup" />
-              <img src="/screenshot_window.png" alt="Monitor Minder Window" className="app-window" />
+              <img src={SS1} alt="macOS Desktop Mockup" className="large-mockup" />
+              <img src={SS4} alt="Monitor Minder Window" className="app-window" />
+              {/* <img src={SS4} alt="Monitor Minder Window" className="app-window" /> */}
+
             </div>
           </div>
         </div>
